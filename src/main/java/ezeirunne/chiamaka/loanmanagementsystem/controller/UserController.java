@@ -1,2 +1,63 @@
-package ezeirunne.chiamaka.loanmanagementsystem.controller;public class UserController {
+package ezeirunne.chiamaka.loanmanagementsystem.controller;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.Loan;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.Payment;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
+import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
+import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
+import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
+import ezeirunne.chiamaka.loanmanagementsystem.services.UserServices;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@AllArgsConstructor
+@RequestMapping("api/loan/user/")
+@Slf4j
+public class UserController {
+
+    private final UserServices services;
+
+    @PostMapping("register/")
+    public Response register(@RequestBody RegisterUserRequest request){
+        try {
+            return services.register(request);
+        }
+        catch (InvalidDetailException e){
+            log.info("Invalid detail");
+            return services.register(request);
+        }
+    }
+
+    @GetMapping("login/")
+    public Response login(@RequestBody LoginUserRequest request){
+        return services.login(request);
+    }
+
+    @PostMapping("loan/")
+    public Response loan(@RequestBody UserLoanRequest request){
+        return services.loan(request);
+    }
+
+    @GetMapping("find/")
+    public User find(@RequestBody Request request){
+        return services.find(request);
+    }
+
+    @GetMapping("findLoan/")
+    public Loan findLoan(@RequestBody Request request){
+        return services.findLoan(request);
+    }
+
+    @PostMapping("payment/")
+    public Response payment(@RequestBody PaymentRequest request){
+        return services.payment(request);
+    }
+
+    @GetMapping("findPayment/")
+    public List<Payment> findPayment(@RequestBody Request request){
+        return services.findPayment(request);
+    }
 }
