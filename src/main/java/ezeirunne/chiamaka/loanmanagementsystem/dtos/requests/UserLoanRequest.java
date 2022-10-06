@@ -1,14 +1,14 @@
 package ezeirunne.chiamaka.loanmanagementsystem.dtos.requests;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigInteger;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@Builder
 public class UserLoanRequest {
     private String email;
 

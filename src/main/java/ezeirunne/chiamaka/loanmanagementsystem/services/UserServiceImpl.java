@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements UserServices {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public Response register(RegisterUserRequest request) {
+        if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
         System.out.println("=====>Calling this service");
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         User user = User.builder()
@@ -75,11 +76,11 @@ public class UserServiceImpl implements UserServices {
             Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
             if (loan.isPresent()) {
                 if (loan.get().getBalance().intValue() > 0) {
-                    throw new InvalidDetailException("Pay up your loan of " + loan.get().getBalance());               }
+                    throw new InvalidDetailException("Pay up your loan of " + loan.get().getBalance());
+                }
                 return getALoan(request, user);
 
             }
-
             return getALoan(request, user);
 
         }
@@ -94,6 +95,7 @@ public class UserServiceImpl implements UserServices {
                     .loanPurpose(request.getLoanPurpose())
                     .loanPlan(request.getLoanPlan())
                     .guarantorName(request.getGuarantorName())
+                    .loanDate(LocalDate.now())
                     .guarantorPhoneNumber(request.getGuarantorPhoneNumber())
                     .balance(request.getAmount())
                     .user(user.get())
@@ -105,7 +107,6 @@ public class UserServiceImpl implements UserServices {
             response.setMessage("amount must be greater than zero(0)");
         }
         return response;
-
     }
 
     @Override
@@ -139,39 +140,35 @@ public class UserServiceImpl implements UserServices {
         Optional<User> user = userRepository.findUserByEmail(request.getEmail());
         if(user.isPresent()){
             Response response = new Response();
-            if(user.get().getPassword().equals(request.getPassword())){
-
-                Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
-                if(loan.isPresent()){
-                    if(loan.get().getBalance().intValue() > 0){
-                        if(request.getAmount().intValue() > 0){
-                            if(request.getAmount().intValue() > loan.get().getBalance().intValue()){
-                                response.setMessage("Amount is greater than balance");
-                            }else {
-                                Payment payment = Payment.builder()
-                                        .paymentType(request.getPaymentType())
-                                        .amount(request.getAmount())
-                                        .loan(loan.get())
-                                        .build();
-                                loan.get().setBalance(loan.get().getBalance().subtract(request.getAmount()));
-                                Loan saved = loanRepository.save(loan.get());
-                                Payment savePayment = paymentRepository.save(payment);
-                                response.setMessage("Your new balance is "+saved.getBalance());
-                            }
-
+            Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
+            if(loan.isPresent()){
+                if(loan.get().getBalance().intValue() > 0){
+                    if(request.getAmount().intValue() > 0){
+                        if(request.getAmount().intValue() > loan.get().getBalance().intValue()){
+                            response.setMessage("Amount is greater than balance");
                         }else {
-                            response.setMessage("amount must be greater than zero ");
+                            Payment payment = Payment.builder()
+                                    .paymentType(request.getPaymentType())
+                                    .amount(request.getAmount())
+                                    .loan(loan.get())
+                                    .build();
+                            loan.get().setBalance(loan.get().getBalance().subtract(request.getAmount()));
+                            Loan saved = loanRepository.save(loan.get());
+                            Payment savePayment = paymentRepository.save(payment);
+                            response.setMessage("Your new balance is "+saved.getBalance());
                         }
+
                     }else {
-                        response.setMessage("Your debt has been cleared");
+                        response.setMessage("amount must be greater than zero ");
                     }
-                    return response;
+                }else {
+                    response.setMessage("Your debt has been cleared");
                 }
-                throw new InvalidDetailException("User does not have a loan");
+                return response;
             }
-            throw new InvalidDetailException("Invalid detail");
+                throw new InvalidDetailException("User does not have a loan");
         }
-        throw new InvalidDetailException("User does not exist");
+            throw new InvalidDetailException("User does not exist");
     }
 
     @Override

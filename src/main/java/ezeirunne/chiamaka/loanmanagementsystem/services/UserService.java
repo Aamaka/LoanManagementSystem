@@ -7,7 +7,7 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 
 import java.util.List;
 
-public interface UserServices {
+public interface UserService {
     Response register(RegisterUserRequest request);
     Response login(LoginUserRequest request);
 

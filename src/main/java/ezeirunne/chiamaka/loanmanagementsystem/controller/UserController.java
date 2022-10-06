@@ -5,20 +5,28 @@ import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
-import ezeirunne.chiamaka.loanmanagementsystem.services.UserServices;
-import lombok.AllArgsConstructor;
+import ezeirunne.chiamaka.loanmanagementsystem.services.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+//@AllArgsConstructor
 @RequestMapping("api/loan/user/")
 @Slf4j
 public class UserController {
 
-    private final UserServices services;
+
+
+    private final UserService services;
+
+    @Autowired
+    public UserController(UserService services) {
+        this.services = services;
+    }
+
 
     @PostMapping("register/")
     public Response register(@RequestBody RegisterUserRequest request){
@@ -38,7 +46,13 @@ public class UserController {
 
     @PostMapping("loan/")
     public Response loan(@RequestBody UserLoanRequest request){
-        return services.loan(request);
+        try {
+            return services.loan(request);
+        }
+        catch (InvalidDetailException e){
+            log.info("Invalid detail");
+            return services.loan(request);
+        }
     }
 
     @GetMapping("find/")
