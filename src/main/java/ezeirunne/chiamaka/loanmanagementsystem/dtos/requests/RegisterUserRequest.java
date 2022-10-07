@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
+
 import javax.persistence.Column;
 import javax.validation.constraints.Email;
 
@@ -12,6 +14,7 @@ import javax.validation.constraints.Email;
 @NoArgsConstructor
 @Getter
 @Setter
+@Validated
 public class RegisterUserRequest {
     private String name;
     private String address;

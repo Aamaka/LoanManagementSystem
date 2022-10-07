@@ -10,6 +10,8 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,25 +28,21 @@ public class UserServiceImpl implements UserService {
     private final LoanRepository loanRepository;
     private final PaymentRepository paymentRepository;
 
+
+    private final PasswordEncoder passwordEncoder;
+
+
+    private final ModelMapper modelMapper;
+
     @Override
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
-        System.out.println("=====>Calling this service");
+        log.info("=====>Calling this service");
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        User user = User.builder()
-                .name(request.getName())
-                .address(request.getAddress())
-                .gender(request.getGender())
-                .nin(request.getNin())
-                .dob(LocalDate.parse(request.getDob(), dateTimeFormat))
-                .accountNumber(request.getAccountNumber())
-                .phoneNumber(request.getPhoneNumber())
-                .bankName(request.getBankName())
-                .email(request.getEmail())
-                .occupation(request.getOccupation())
-                .password(request.getPassword())
-                .confirmPassword(request.getConfirmPassword())
-                .build();
+
+        User user = modelMapper.map(request, User.class);
+        user.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         if (request.getConfirmPassword().equals(request.getPassword())) {
             User saveUser = userRepository.save(user);
             Response response = new Response();
@@ -58,7 +56,7 @@ public class UserServiceImpl implements UserService {
     public Response login(LoginUserRequest request) {
         Optional<User> user = userRepository.findUserByEmail(request.getEmail());
         if (user.isPresent()) {
-            if (request.getPassword().equals(user.get().getPassword())) {
+            if (passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
                 Response response = new Response();
                 response.setMessage("Welcome back " + user.get().getName());
                 return response;
