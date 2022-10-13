@@ -1,4 +1,6 @@
 package ezeirunne.chiamaka.loanmanagementsystem.services;
+
+import ezeirunne.chiamaka.loanmanagementsystem.configuration.SecureUser;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Loan;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Payment;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
@@ -8,48 +10,58 @@ import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.UserRepository;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
-import lombok.AllArgsConstructor;
+import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import static ezeirunne.chiamaka.loanmanagementsystem.validation.ValidateEmail.validateEmail;
+
 @Slf4j
 @Service
-@AllArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private LoanRepository loanRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
-    private final LoanRepository loanRepository;
-    private final PaymentRepository paymentRepository;
-
-
-    private final PasswordEncoder passwordEncoder;
-
-
-    private final ModelMapper modelMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
         log.info("=====>Calling this service");
-        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if(validateEmail(request.getEmail())){
+            DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        User user = modelMapper.map(request, User.class);
-        user.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        if (request.getConfirmPassword().equals(request.getPassword())) {
-            User saveUser = userRepository.save(user);
-            Response response = new Response();
-            response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
-            return response;
+            User user = modelMapper.map(request, User.class);
+            user.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            if (request.getConfirmPassword().equals(request.getPassword())) {
+                User saveUser = userRepository.save(user);
+                Response response = new Response();
+                response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
+                return response;
+            }
+            throw new InvalidDetailException("Invalid details");
         }
-        throw new InvalidDetailException("Invalid details");
+       throw new InvalidSyntaxException("Email syntax is invalid");
     }
 
     @Override
@@ -180,4 +192,11 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findUserByEmail(username)
+                .orElseThrow(()->new UsernameNotFoundException("username not found"));
+        SecureUser secureUser = new SecureUser(user);
+        return secureUser;
+    }
 }

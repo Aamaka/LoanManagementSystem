@@ -39,7 +39,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("login/")
+    @PostMapping("login/")
     public Response login(@RequestBody LoginUserRequest request){
         return services.login(request);
     }
