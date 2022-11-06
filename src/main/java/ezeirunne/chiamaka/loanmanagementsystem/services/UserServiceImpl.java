@@ -1,9 +1,9 @@
 package ezeirunne.chiamaka.loanmanagementsystem.services;
 
-import ezeirunne.chiamaka.loanmanagementsystem.configuration.SecureUser;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Loan;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Payment;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.VerificationToken;
 import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.LoanRepository;
 import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.PaymentRepository;
 import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.UserRepository;
@@ -11,6 +11,7 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +30,14 @@ import static ezeirunne.chiamaka.loanmanagementsystem.validation.ValidateEmail.v
 
 @Slf4j
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService {
+@AllArgsConstructor
+public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private LoanRepository loanRepository;
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ModelMapper modelMapper;
+    private final UserRepository userRepository;
+    private final LoanRepository loanRepository;
+    private final PaymentRepository paymentRepository;
+    private final ModelMapper modelMapper;
+    private VerificationTokenService verificationTokenService;
 
     @Override
     public Response register(RegisterUserRequest request) {
@@ -52,9 +48,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
             User user = modelMapper.map(request, User.class);
             user.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
             if (request.getConfirmPassword().equals(request.getPassword())) {
                 User saveUser = userRepository.save(user);
+                VerificationToken token = verificationTokenService.createToken(request.getEmail());
                 Response response = new Response();
                 response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
                 return response;
@@ -68,7 +64,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public Response login(LoginUserRequest request) {
         Optional<User> user = userRepository.findUserByEmail(request.getEmail());
         if (user.isPresent()) {
-            if (passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+            if (user.get().getPassword().equals(request.getPassword())) {
                 Response response = new Response();
                 response.setMessage("Welcome back " + user.get().getName());
                 return response;
@@ -110,6 +106,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     .balance(request.getAmount())
                     .user(user.get())
                     .build();
+
             Loan saved = loanRepository.save(loan);
 
             response.setMessage(saved.getUser().getName() + " Your request has been received we will get back to you");
@@ -192,11 +189,4 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(username)
-                .orElseThrow(()->new UsernameNotFoundException("username not found"));
-        SecureUser secureUser = new SecureUser(user);
-        return secureUser;
-    }
 }
