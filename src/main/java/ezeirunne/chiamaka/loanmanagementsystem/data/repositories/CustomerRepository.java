@@ -1,15 +1,15 @@
 package ezeirunne.chiamaka.loanmanagementsystem.data.repositories;
 
-import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    Optional<User> findUserByEmail(String email);
+    Optional<Customer> findCustomerByEmail(String email);
 
     boolean existsByEmail(String email);
 }

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +16,5 @@ public class PaymentRequest {
     private String email;
     private String password;
     private PaymentType paymentType;
-    private BigInteger amount;
+    private BigDecimal amount;
 }

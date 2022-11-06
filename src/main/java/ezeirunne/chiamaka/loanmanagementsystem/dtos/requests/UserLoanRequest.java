@@ -2,7 +2,7 @@ package ezeirunne.chiamaka.loanmanagementsystem.dtos.requests;
 
 import lombok.*;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,7 +12,7 @@ import java.math.BigInteger;
 public class UserLoanRequest {
     private String email;
 
-    private BigInteger amount;
+    private BigDecimal amount;
 
     private String loanPurpose;
 

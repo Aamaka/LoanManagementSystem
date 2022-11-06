@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 
@@ -18,12 +19,12 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private BigInteger amount;
+    private BigDecimal amount;
 
     private LocalDate dueDate;
     private String duration;
 
-    private BigInteger balance ;
+    private BigDecimal balance ;
 
     @DateTimeFormat
     private LocalDate loanDate = LocalDate.now();
@@ -37,6 +38,6 @@ public class Loan {
 
     @JoinColumn
     @OneToOne
-    private User user;
+    private Customer user;
 
 }

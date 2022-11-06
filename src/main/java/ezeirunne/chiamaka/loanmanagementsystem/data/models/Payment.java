@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 
@@ -20,7 +21,7 @@ public class Payment {
     private long id;
     @DateTimeFormat
     private LocalDate date = LocalDate.now();
-    private BigInteger amount;
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;

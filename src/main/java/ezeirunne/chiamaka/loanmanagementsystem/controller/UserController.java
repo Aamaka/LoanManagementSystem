@@ -1,11 +1,12 @@
 package ezeirunne.chiamaka.loanmanagementsystem.controller;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Loan;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Payment;
-import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.Customer;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
-import ezeirunne.chiamaka.loanmanagementsystem.services.UserService;
+import ezeirunne.chiamaka.loanmanagementsystem.services.CustomerService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-//@AllArgsConstructor
+@AllArgsConstructor
 @RequestMapping("api/loan/user/")
 @Slf4j
 public class UserController {
 
 
 
-    private final UserService services;
-
-    @Autowired
-    public UserController(UserService services) {
-        this.services = services;
-    }
+    private final CustomerService services;
 
 
     @PostMapping("register/")
@@ -38,11 +34,11 @@ public class UserController {
             return services.register(request);
         }
     }
-
-    @PostMapping("login/")
-    public Response login(@RequestBody LoginUserRequest request){
-        return services.login(request);
-    }
+//
+//    @PostMapping("login/")
+//    public Response login(@RequestBody LoginUserRequest request){
+//        return services.login(request);
+//    }
 
     @PostMapping("loan/")
     public Response loan(@RequestBody UserLoanRequest request){
@@ -56,7 +52,7 @@ public class UserController {
     }
 
     @GetMapping("find/")
-    public User find(@RequestBody Request request){
+    public Customer find(@RequestBody Request request){
         return services.find(request);
     }
 

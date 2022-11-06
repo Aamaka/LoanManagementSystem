@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceImplTest {
 
     @Autowired
-    private UserService userServices;
+    private CustomerService userServices;
 
     @Test
    public void register() {
@@ -43,19 +44,10 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void login() {
-        LoginUserRequest request = new LoginUserRequest();
-        request.setEmail("ada@gmail.com");
-        request.setPassword("joy");
-        Response response = userServices.login(request);
-        assertEquals("Welcome back Ada",response.getMessage());
-    }
-
-    @Test
     @DisplayName("test that a user can apply for a loan")
     public void takeALoanTest(){
         UserLoanRequest request = UserLoanRequest.builder()
-                .amount(BigInteger.valueOf(100000))
+                .amount(BigDecimal.valueOf(100000))
                 .loanPlan("1 year")
                 .loanPurpose("Marketing")
                 .guarantorName("Ade")
@@ -76,7 +68,7 @@ class UserServiceImplTest {
     @DisplayName("Test that a user can pay up their loan")
     public void paymentTest(){
         PaymentRequest paymentRequest = PaymentRequest.builder()
-                .amount(BigInteger.valueOf(50000))
+                .amount(BigDecimal.valueOf(50000))
                 .email("ada@gmail.com")
                 .paymentType(PaymentType.CARD)
                 .password("joy")
