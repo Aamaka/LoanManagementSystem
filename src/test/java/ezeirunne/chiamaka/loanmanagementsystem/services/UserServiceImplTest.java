@@ -1,5 +1,4 @@
 package ezeirunne.chiamaka.loanmanagementsystem.services;
-import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.LoginUserRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.PaymentRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.RegisterUserRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.UserLoanRequest;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +40,15 @@ class UserServiceImplTest {
         assertNotNull(request);
         assertEquals("Your registration was successful, Welcome Ada", response.getMessage());
     }
+
+//    @Test
+//    public void login() {
+//        LoginUserRequest request = new LoginUserRequest();
+//        request.setEmail("ada@gmail.com");
+//        request.setPassword("joy");
+//        Response response = uServices.login(request);
+//        assertEquals("Welcome back Ada",response.getMessage());
+//    }
 
     @Test
     @DisplayName("test that a user can apply for a loan")
