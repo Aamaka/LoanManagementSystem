@@ -6,6 +6,7 @@ import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.PaymentReposito
 import ezeirunne.chiamaka.loanmanagementsystem.data.repositories.CustomerRepository;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
+import ezeirunne.chiamaka.loanmanagementsystem.enums.Authority;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException;
 import lombok.AllArgsConstructor;
@@ -36,35 +37,31 @@ public class CustomerServiceImpl implements CustomerService {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
         log.info("=====>Calling this service");
         if(validateEmail(request.getEmail())){
-            DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-            Customer customer = modelMapper.map(request, Customer.class);
-            customer.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
+            Customer customer = onBoardCustomer(request);
             if (request.getConfirmPassword().equals(request.getPassword())) {
-                User saveUser = userRepository.save(customer);
-                VerificationToken token = verificationTokenService.createToken(request.getEmail());
-                Response response = new Response();
-                response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
-                return response;
+                return response(request, customer);
             }
             throw new InvalidDetailException("Invalid details");
         }
        throw new InvalidSyntaxException("Email syntax is invalid");
     }
 
-//    @Override
-//    public Response login(LoginUserRequest request) {
-//        Optional<Customer> user = userRepository.findUserByEmail(request.getEmail());
-//        if (user.isPresent()) {
-//            if (user.get().getPassword().equals(request.getPassword())) {
-//                Response response = new Response();
-//                response.setMessage("Welcome back " + user.get().getName());
-//                return response;
-//            }
-//            throw new InvalidDetailException("Invalid details");
-//        }
-//        throw new InvalidDetailException("User does not exist");
-//    }
+    private Response response(RegisterUserRequest request, Customer customer) {
+        User saveUser = userRepository.save(customer);
+        VerificationToken token = verificationTokenService.createToken(request.getEmail());
+        Response response = new Response();
+        response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
+        return response;
+    }
+
+    private Customer onBoardCustomer(RegisterUserRequest request) {
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        Customer customer = modelMapper.map(request, Customer.class);
+        customer.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
+        customer.getAuthority().add(Authority.BORROWER);
+        return customer;
+    }
 
     @Override
     public Response loan(UserLoanRequest request) {

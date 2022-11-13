@@ -2,6 +2,7 @@ package ezeirunne.chiamaka.loanmanagementsystem.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ezeirunne.chiamaka.loanmanagementsystem.data.models.Customer;
+import ezeirunne.chiamaka.loanmanagementsystem.security.jwt.JwtUtil;
 import ezeirunne.chiamaka.loanmanagementsystem.security.manager.LoanAuthenticationManager;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -16,12 +18,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @AllArgsConstructor
 public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     ObjectMapper objectMapper;
     private final LoanAuthenticationManager loanAuthenticationManager;
+
+    private final JwtUtil jwt ;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -45,6 +53,14 @@ public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        UserDetails userDetails = (UserDetails) authResult.getPrincipal();
+        String accessToken = jwt.generateAccessToken(userDetails);
+        String refreshToke = jwt.generateRefreshTokens(userDetails);
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token", refreshToke);
+        response.setContentType(APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(), tokens);
 
     }
 }

@@ -1,15 +1,15 @@
 package ezeirunne.chiamaka.loanmanagementsystem.data.models;
 
+import ezeirunne.chiamaka.loanmanagementsystem.enums.Authority;
 import ezeirunne.chiamaka.loanmanagementsystem.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @MappedSuperclass
 @AllArgsConstructor
@@ -31,5 +31,8 @@ public class User {
 
     private String password;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Authority> authority = new HashSet<>();
 
 }
