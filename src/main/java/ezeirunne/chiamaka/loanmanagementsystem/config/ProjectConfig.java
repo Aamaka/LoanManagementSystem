@@ -1,15 +1,22 @@
-package ezeirunne.chiamaka.loanmanagementsystem.security.config;
+package ezeirunne.chiamaka.loanmanagementsystem.config;
 
-import ezeirunne.chiamaka.loanmanagementsystem.util.LoanUserDetailService;
+import com.auth0.jwt.algorithms.Algorithm;
+import ezeirunne.chiamaka.loanmanagementsystem.security.jwt.JwtUtil;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class ProjectConfig {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.issuer}")
+    private String jwtIssuer;
 
     @Bean
     public ModelMapper modelMapper(){
@@ -21,4 +28,8 @@ public class ProjectConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public JwtUtil jwtUtil(){
+        return new JwtUtil(jwtIssuer, Algorithm.HMAC512(jwtSecret));
+    }
 }

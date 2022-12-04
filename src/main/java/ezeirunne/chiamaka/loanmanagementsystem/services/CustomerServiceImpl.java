@@ -12,6 +12,7 @@ import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,12 +31,12 @@ public class CustomerServiceImpl implements CustomerService {
     private final LoanRepository loanRepository;
     private final PaymentRepository paymentRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
     private VerificationTokenService verificationTokenService;
 
     @Override
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
-        log.info("=====>Calling this service");
         if(validateEmail(request.getEmail())){
             Customer customer = onBoardCustomer(request);
             if (request.getConfirmPassword().equals(request.getPassword())) {
@@ -59,12 +60,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         Customer customer = modelMapper.map(request, Customer.class);
         customer.setDob(LocalDate.parse(request.getDob(), dateTimeFormat));
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
         customer.getAuthority().add(Authority.BORROWER);
         return customer;
     }
 
     @Override
-    public Response loan(UserLoanRequest request) {
+    public Response applyForLoan(UserLoanRequest request) {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
 
         if (user.isPresent()) {
@@ -106,7 +108,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer find(Request request) {
+    public Customer findUser(Request request) {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
         if (user.isPresent()) {
             return user.get();
@@ -132,7 +134,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Response payment(PaymentRequest request) {
+    public Response makePayment(PaymentRequest request) {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
         if(user.isPresent()){
             Response response = new Response();
@@ -174,7 +176,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(!payment.isEmpty()){
             return payment;
         }
-        throw new InvalidDetailException("User as not made a payment");
+        throw new InvalidDetailException("User has not made a payment");
     }
 
 

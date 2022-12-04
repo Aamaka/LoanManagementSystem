@@ -10,12 +10,12 @@ import java.util.List;
 public interface CustomerService {
     Response register(RegisterUserRequest request);
 
-    Response loan(UserLoanRequest request);
-    Customer find (Request request);
+    Response applyForLoan(UserLoanRequest request);
+    Customer findUser(Request request);
 
     Loan findLoan(Request request);
 
-    Response payment (PaymentRequest request);
+    Response makePayment(PaymentRequest request);
 
     List<Payment> findPayment(Request request);
 }

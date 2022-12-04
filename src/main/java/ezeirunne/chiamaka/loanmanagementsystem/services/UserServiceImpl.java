@@ -8,6 +8,7 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.LoginUserRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,14 +19,15 @@ public class UserServiceImpl implements UserService {
 
     private final AdminRepository adminRepository;
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
     @Override
     public Response login(LoginUserRequest request) {
         Optional<Admin> admin = adminRepository.findAdminByEmail(request.getEmail());
-        if(admin.isPresent() && admin.get().getPassword().equals(request.getPassword()))
+        if(passwordEncoder.matches(request.getPassword(), admin.get().getPassword()))
             return response(admin.get());
 
         Optional<Customer> customer = customerRepository.findCustomerByEmail(request.getEmail());
-        if(customer.isPresent() && customer.get().getPassword().equals(request.getPassword()))
+        if(passwordEncoder.matches(request.getPassword(), customer.get().getPassword()))
             return response(customer.get());
 
         return Response.builder()

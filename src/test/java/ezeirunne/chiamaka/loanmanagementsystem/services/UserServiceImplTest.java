@@ -62,7 +62,7 @@ class UserServiceImplTest {
                 .email("ada@gmail.com")
                 .build();
         try{
-            Response response = userServices.loan(request);
+            Response response = userServices.applyForLoan(request);
             assertNotNull(response);
             assertEquals("Ada Your request has been received we will get back to you",response.getMessage());
         }catch (InvalidDetailException ex){
@@ -80,7 +80,7 @@ class UserServiceImplTest {
                 .paymentType(PaymentType.CARD)
                 .password("joy")
                 .build();
-        Response payment = userServices.payment(paymentRequest);
+        Response payment = userServices.makePayment(paymentRequest);
         assertThat("Your new balance is 50000").isEqualTo(payment.getMessage());
 
     }

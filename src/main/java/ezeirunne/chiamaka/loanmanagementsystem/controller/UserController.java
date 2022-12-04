@@ -5,26 +5,29 @@ import ezeirunne.chiamaka.loanmanagementsystem.data.models.Customer;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.*;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
+import ezeirunne.chiamaka.loanmanagementsystem.services.AdminService;
 import ezeirunne.chiamaka.loanmanagementsystem.services.CustomerService;
+import ezeirunne.chiamaka.loanmanagementsystem.services.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/loan/user/")
+@RequestMapping("/api/loan/user/")
 @Slf4j
 public class UserController {
 
 
 
     private final CustomerService services;
+    private final UserService userService;
+    private final AdminService adminService;
 
 
-    @PostMapping("register/")
+    @PostMapping("registerACustomer/")
     public Response register(@RequestBody RegisterUserRequest request){
         try {
             return services.register(request);
@@ -34,26 +37,31 @@ public class UserController {
             return services.register(request);
         }
     }
-//
-//    @PostMapping("login/")
-//    public Response login(@RequestBody LoginUserRequest request){
-//        return services.login(request);
-//    }
 
-    @PostMapping("loan/")
+    @PostMapping("registerAnAdmin/")
+    public Response adminRegistration( @RequestBody AdminRegistrationRequest request){
+        return adminService.adminRegistration(request);
+    }
+
+    @PostMapping("login/")
+    public Response login(@RequestBody LoginUserRequest request){
+        return userService.login(request);
+    }
+
+    @PostMapping("applyForLoan/")
     public Response loan(@RequestBody UserLoanRequest request){
         try {
-            return services.loan(request);
+            return services.applyForLoan(request);
         }
         catch (InvalidDetailException e){
             log.info("Invalid detail");
-            return services.loan(request);
+            return services.applyForLoan(request);
         }
     }
 
-    @GetMapping("find/")
+    @GetMapping("findCustomer/")
     public Customer find(@RequestBody Request request){
-        return services.find(request);
+        return services.findUser(request);
     }
 
     @GetMapping("findLoan/")
@@ -61,9 +69,9 @@ public class UserController {
         return services.findLoan(request);
     }
 
-    @PostMapping("payment/")
+    @PostMapping("makePayment/")
     public Response payment(@RequestBody PaymentRequest request){
-        return services.payment(request);
+        return services.makePayment(request);
     }
 
     @GetMapping("findPayment/")

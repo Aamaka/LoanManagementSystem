@@ -20,8 +20,8 @@ public class VerificationToken {
     private Long id;
     private String token;
     private String userEmail;
-    private LocalDateTime createdAt=LocalDateTime.now();
-    private LocalDateTime expiresAt = createdAt.plusMinutes(5);
+    private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
 
 
 }

@@ -1,10 +1,11 @@
 package ezeirunne.chiamaka.loanmanagementsystem.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ezeirunne.chiamaka.loanmanagementsystem.data.models.Customer;
+import ezeirunne.chiamaka.loanmanagementsystem.data.models.User;
 import ezeirunne.chiamaka.loanmanagementsystem.security.jwt.JwtUtil;
 import ezeirunne.chiamaka.loanmanagementsystem.security.manager.LoanAuthenticationManager;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,18 +25,20 @@ import java.util.Map;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    ObjectMapper objectMapper;
     private final LoanAuthenticationManager loanAuthenticationManager;
 
     private final JwtUtil jwt ;
+    ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        Customer user;
+        User user;
         try {
-            user = objectMapper.readValue(request.getReader(), Customer.class);
+            user = objectMapper.readValue(request.getReader(), User.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
