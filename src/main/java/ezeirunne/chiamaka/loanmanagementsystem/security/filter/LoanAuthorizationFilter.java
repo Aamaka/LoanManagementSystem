@@ -45,7 +45,6 @@ public class LoanAuthorizationFilter extends OncePerRequestFilter {
                                     .map(SimpleGrantedAuthority::new)
                                     .toList());
 
-
                     SecurityContextHolder.getContext().setAuthentication(passwordAuthenticationToken);
                     filterChain.doFilter(request, response);
                 }catch (Exception e){

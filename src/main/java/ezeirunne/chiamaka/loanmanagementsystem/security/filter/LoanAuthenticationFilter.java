@@ -42,26 +42,28 @@ public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        UsernamePasswordAuthenticationToken authenticationToken = new
+
+        var authenticationToken = new
                 UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
 
         Authentication authenticatedToken =
                 loanAuthenticationManager.authenticate(authenticationToken);
         if(authenticatedToken != null){
             SecurityContext securityContext = SecurityContextHolder.getContext();
-            securityContext.setAuthentication(authenticationToken);
+            securityContext.setAuthentication(authenticatedToken);
             return authenticatedToken;
         }
         throw  new BadCredentialsException("Invalid details");
     }
 
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                            FilterChain chain, Authentication authResult) throws IOException, ServletException {
         UserDetails userDetails = (UserDetails) authResult.getPrincipal();
         String accessToken = jwt.generateAccessToken(userDetails);
-        String refreshToke = jwt.generateRefreshTokens(userDetails);
+        String refreshToken = jwt.generateRefreshTokens(userDetails);
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToke);
+        tokens.put("refresh_token", refreshToken);
         response.setContentType(APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getOutputStream(), tokens);
 

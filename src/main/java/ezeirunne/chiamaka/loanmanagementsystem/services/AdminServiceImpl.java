@@ -22,14 +22,17 @@ public class AdminServiceImpl implements AdminService{
 
     @Override
     public Response adminRegistration(AdminRegistrationRequest request) {
-        if(adminRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
-        Admin admin = modelMapper.map(request, Admin.class);
-        admin.setPassword(passwordEncoder.encode(request.getPassword()));
-        admin.getAuthority().add(Authority.LENDER);
+        if(adminRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("Admin already exist");
+
         if(request.getPassword().equals(request.getConfirmPassword())) {
+            Admin admin = modelMapper.map(request, Admin.class);
+            admin.getAuthority().add(Authority.LENDER);
+            admin.setPassword(passwordEncoder.encode(request.getPassword()));
+
             Admin saved = adminRepository.save(admin);
             Response response = new Response();
             response.setMessage(String.format("%s, your registration was successful", saved.getName()));
+            return response;
         }
         throw new BadCredentialsException("Password mismatch");
     }

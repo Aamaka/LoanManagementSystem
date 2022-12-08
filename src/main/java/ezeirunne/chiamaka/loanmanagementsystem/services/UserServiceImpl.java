@@ -23,11 +23,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response login(LoginUserRequest request) {
         Optional<Admin> admin = adminRepository.findAdminByEmail(request.getEmail());
-        if(passwordEncoder.matches(request.getPassword(), admin.get().getPassword()))
+        if(admin.isPresent() && passwordEncoder.matches(request.getPassword(), admin.get().getPassword()))
             return response(admin.get());
 
         Optional<Customer> customer = customerRepository.findCustomerByEmail(request.getEmail());
-        if(passwordEncoder.matches(request.getPassword(), customer.get().getPassword()))
+        if(customer.isPresent() && passwordEncoder.matches(request.getPassword(), customer.get().getPassword()))
             return response(customer.get());
 
         return Response.builder()

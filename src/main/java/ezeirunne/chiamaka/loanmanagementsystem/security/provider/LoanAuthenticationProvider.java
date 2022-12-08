@@ -27,7 +27,7 @@ public class LoanAuthenticationProvider implements AuthenticationProvider {
         if(userDetails != null){
             if(isMatches(authentication, userDetails)){
                 return new UsernamePasswordAuthenticationToken(userDetails, authentication.getCredentials(),
-                        authentication.getAuthorities());
+                        userDetails.getAuthorities());
             }
             throw new BadCredentialsException("Incorrect password");
         }

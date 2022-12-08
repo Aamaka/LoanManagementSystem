@@ -38,8 +38,8 @@ public class CustomerServiceImpl implements CustomerService {
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
         if(validateEmail(request.getEmail())){
-            Customer customer = onBoardCustomer(request);
             if (request.getConfirmPassword().equals(request.getPassword())) {
+                Customer customer = onBoardCustomer(request);
                 return response(request, customer);
             }
             throw new InvalidDetailException("Invalid details");

@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @AllArgsConstructor
 @EnableWebSecurity
-public class SecurityConfig{
+public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final LoanAuthenticationManager loanAuthenticationManager;
@@ -36,10 +36,11 @@ public class SecurityConfig{
                             "/api/loan/user/registerACustomer/",
                         "/api/loan/user/login/")
                 .permitAll()
-                .antMatchers("/api/loan/user/loan/",
-                        "/api/loan/user/find/",
+                .antMatchers("/api/loan/user/applyForLoan/",
+                        "/api/loan/user/findCustomer/",
                         "/api/loan/user/findLoan/",
-                        "/api/loan/user/payment/",
+
+                        "/api/loan/user/makePayment/",
                         "/api/loan/user/findPayment/"
                 )
                 .hasAnyAuthority("BORROWER")

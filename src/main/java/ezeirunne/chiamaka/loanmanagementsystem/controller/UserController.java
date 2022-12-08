@@ -50,13 +50,7 @@ public class UserController {
 
     @PostMapping("applyForLoan/")
     public Response loan(@RequestBody UserLoanRequest request){
-        try {
             return services.applyForLoan(request);
-        }
-        catch (InvalidDetailException e){
-            log.info("Invalid detail");
-            return services.applyForLoan(request);
-        }
     }
 
     @GetMapping("findCustomer/")
