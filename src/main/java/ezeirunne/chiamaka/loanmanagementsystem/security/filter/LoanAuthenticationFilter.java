@@ -35,7 +35,9 @@ public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) {
+        logger.info("LoanAuthenticationFilter");
         User user;
         try {
             user = objectMapper.readValue(request.getReader(), User.class);
@@ -62,8 +64,8 @@ public class LoanAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         String accessToken = jwt.generateAccessToken(userDetails);
         String refreshToken = jwt.generateRefreshTokens(userDetails);
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToken);
+        tokens.put("ACCESS TOKEN", accessToken);
+        tokens.put("REFRESH TOKEN", refreshToken);
         response.setContentType(APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getOutputStream(), tokens);
 

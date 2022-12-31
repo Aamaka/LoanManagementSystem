@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/loan/user/")
+@RequestMapping("/api/loan/users/")
 @Slf4j
 public class UserController {
 
@@ -27,7 +27,7 @@ public class UserController {
     private final AdminService adminService;
 
 
-    @PostMapping("registerACustomer/")
+    @PostMapping("register-a-customer/")
     public Response register(@RequestBody RegisterUserRequest request){
         try {
             return services.register(request);
@@ -38,7 +38,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("registerAnAdmin/")
+    @PostMapping("register-an-admin/")
     public Response adminRegistration( @RequestBody AdminRegistrationRequest request){
         return adminService.adminRegistration(request);
     }
@@ -48,27 +48,28 @@ public class UserController {
         return userService.login(request);
     }
 
-    @PostMapping("applyForLoan/")
+    @PostMapping("apply-for-loan/")
     public Response loan(@RequestBody UserLoanRequest request){
+        log.info("GOT HERE CONTROLLER -> {}", request);
             return services.applyForLoan(request);
     }
 
-    @GetMapping("findCustomer/")
+    @GetMapping("find-customer/")
     public Customer find(@RequestBody Request request){
         return services.findUser(request);
     }
 
-    @GetMapping("findLoan/")
+    @GetMapping("find-loan/")
     public Loan findLoan(@RequestBody Request request){
         return services.findLoan(request);
     }
 
-    @PostMapping("makePayment/")
+    @PostMapping("make-payment/")
     public Response payment(@RequestBody PaymentRequest request){
         return services.makePayment(request);
     }
 
-    @GetMapping("findPayment/")
+    @GetMapping("find-payment/")
     public List<Payment> findPayment(@RequestBody Request request){
         return services.findPayment(request);
     }

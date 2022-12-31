@@ -1,6 +1,7 @@
 package ezeirunne.chiamaka.loanmanagementsystem.security.provider;
 
 import ezeirunne.chiamaka.loanmanagementsystem.util.LoanUserDetailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class LoanAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
@@ -23,6 +25,7 @@ public class LoanAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        log.info("authentication provider => {}", authentication);
         UserDetails userDetails = userDetailService.loadUserByUsername((String) authentication.getPrincipal());
         if(userDetails != null){
             if(isMatches(authentication, userDetails)){

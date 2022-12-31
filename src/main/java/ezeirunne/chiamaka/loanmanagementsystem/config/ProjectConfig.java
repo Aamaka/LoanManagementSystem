@@ -28,6 +28,7 @@ public class ProjectConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public JwtUtil jwtUtil(){
         return new JwtUtil(jwtIssuer, Algorithm.HMAC512(jwtSecret));

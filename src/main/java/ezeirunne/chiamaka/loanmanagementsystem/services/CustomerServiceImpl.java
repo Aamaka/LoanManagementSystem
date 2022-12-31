@@ -67,12 +67,17 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Response applyForLoan(UserLoanRequest request) {
+        log.info("GOT HERE SERVICE -> {}", request);
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
+        log.info("USER -> {}", user);
 
         if (user.isPresent()) {
+            log.info(" FIRST IF STATEMENT");
             Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
             if (loan.isPresent()) {
+                log.info(" SECOND IF STATEMENT");
                 if (loan.get().getBalance().intValue() > 0) {
+                    log.info(" THIRD IF STATEMENT");
                     throw new InvalidDetailException("Pay up your loan of " + loan.get().getBalance());
                 }
                 return getALoan(request, user);
@@ -119,7 +124,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Loan findLoan(Request request) {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
-        System.out.println("User");
         if (user.isPresent()) {
             Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
             if(loan.isPresent()){
@@ -149,10 +153,11 @@ public class CustomerServiceImpl implements CustomerService {
                                     .paymentType(request.getPaymentType())
                                     .amount(request.getAmount())
                                     .loan(loan.get())
+                                    .date(LocalDate.now())
                                     .build();
                             loan.get().setBalance(loan.get().getBalance().subtract(request.getAmount()));
                             Loan saved = loanRepository.save(loan.get());
-                            Payment savePayment = paymentRepository.save(payment);
+                            paymentRepository.save(payment);
                             response.setMessage("Your new balance is "+saved.getBalance());
                         }
 
@@ -176,7 +181,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(!payment.isEmpty()){
             return payment;
         }
-        throw new InvalidDetailException("User has not made a payment");
+        throw new InvalidDetailException("User has not made any payment");
     }
 
 

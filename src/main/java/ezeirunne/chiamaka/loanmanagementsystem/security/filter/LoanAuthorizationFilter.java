@@ -5,6 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,31 +15,36 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
+
 import java.util.List;
 
+@Slf4j
 public class LoanAuthorizationFilter extends OncePerRequestFilter {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader(AUTHORIZATION);
-        if(request.getServletPath().equals("/api/loan/user/login/")){
+        if (request.getServletPath().equals("/api/loan/user/login/")) {
             filterChain.doFilter(request, response);
-        }else {
-            if(authHeader != null && authHeader.startsWith("Bearer ")){
+        } else {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 try {
                     String token = authHeader.substring("Bearer".length());
                     JWTVerifier jwtVerifier = JWT
-                            .require(Algorithm.HMAC512("my-application-key-is-special"))
+                            .require(Algorithm.HMAC512("loanApp"))
+                            .ignoreIssuedAt()
                             .build();
-                    DecodedJWT decodedJWT = jwtVerifier.verify(token);
+                    DecodedJWT decodedJWT = jwtVerifier.verify(token.substring(1));
                     String subject = decodedJWT.getSubject();
-                    List<String> roles = decodedJWT.getClaim("roles").asList(String.class);
+                    List<String> roles = decodedJWT.getClaim("role").asList(String.class);
                     UsernamePasswordAuthenticationToken passwordAuthenticationToken =
                             new UsernamePasswordAuthenticationToken(subject, null, roles
                                     .stream()
@@ -47,11 +53,11 @@ public class LoanAuthorizationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(passwordAuthenticationToken);
                     filterChain.doFilter(request, response);
-                }catch (Exception e){
+                } catch (Exception e) {
                     response.setContentType(APPLICATION_JSON_VALUE);
-                    objectMapper.writeValue(response.getOutputStream(), e.getMessage() );
+                    objectMapper.writeValue(response.getOutputStream(), e.getMessage());
                 }
-            }else filterChain.doFilter(request, response);
+            } else filterChain.doFilter(request, response);
         }
 
     }
