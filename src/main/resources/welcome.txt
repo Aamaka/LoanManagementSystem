@@ -1,0 +1,6 @@
+<p>Hi %s,
+We say THANK YOU for choosing Loan Enterprise.On this occasion,
+your application was successful,
+Please click the link below to activate your account.<br/>
+<a href=%s>Activate</a>
+</p>

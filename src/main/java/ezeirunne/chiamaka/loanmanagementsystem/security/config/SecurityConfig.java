@@ -34,19 +34,19 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/loan/user/registerAnAdmin/",
-                        "/api/loan/user/registerACustomer/",
-                        "/api/loan/user/login/")
+                .antMatchers(HttpMethod.POST, "/api/loan/users/register-an-admin/",
+                        "/api/loan/users/register-a-customer/",
+                        "/api/loan/users/login/")
                 .permitAll()
-                .antMatchers("/api/loan/user/applyForLoan/",
-                        "/api/loan/user/findLoan/",
-                        "/api/loan/user/makePayment/",
-                        "/api/loan/user/findPayment/"
+                .antMatchers("/api/loan/users/apply-for-loan/",
+                        "/api/loan/users/find-loan/",
+                        "/api/loan/users/make-payment/",
+                        "/api/loan/users/find-payment/"
                 )
                 .hasAuthority("BORROWER")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/loan/user/findCustomer/")
+                .antMatchers("/api/loan/users/find-customer/")
                 .hasAuthority("LENDER")
                 .and()
                 .addFilter(filter)

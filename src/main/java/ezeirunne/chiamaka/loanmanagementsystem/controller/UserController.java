@@ -33,8 +33,10 @@ public class UserController {
             return services.register(request);
         }
         catch (InvalidDetailException e){
-            log.info("Invalid detail");
-            return services.register(request);
+
+            Response response = new Response();
+            response.setMessage(e.getMessage());
+            return response;
         }
     }
 

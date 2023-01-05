@@ -9,16 +9,21 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.enums.Authority;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException;
+import ezeirunne.chiamaka.loanmanagementsystem.services.Notification.EmailNotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ezeirunne.chiamaka.loanmanagementsystem.validation.ValidateEmail.validateEmail;
 
@@ -32,8 +37,9 @@ public class CustomerServiceImpl implements CustomerService {
     private final PaymentRepository paymentRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
-    private VerificationTokenService verificationTokenService;
+    private final VerificationTokenService verificationTokenService;
 
+    private final EmailNotificationService emailNotificationService;
     @Override
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
@@ -50,9 +56,35 @@ public class CustomerServiceImpl implements CustomerService {
     private Response response(RegisterUserRequest request, Customer customer) {
         User saveUser = userRepository.save(customer);
         VerificationToken token = verificationTokenService.createToken(request.getEmail());
+        emailNotificationService.sendHtmlMail(buildEmailNotificationRequest(token, saveUser.getName()));
         Response response = new Response();
         response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
         return response;
+    }
+
+    private EmailNotificationRequest buildEmailNotificationRequest(VerificationToken token, String name) {
+        String message = getMessageTemplate();
+        String mail = null;
+        if(message != null){
+            var verificationUrl="http://localhost:8080/api/loan/users/verify/" + token.getToken();
+            mail = String.format(message, name, verificationUrl);
+        }
+
+        return EmailNotificationRequest.builder()
+                .userEmail(token.getUserEmail())
+                .mailContent(mail)
+                .build();
+
+    }
+
+    private String getMessageTemplate() {
+        try(BufferedReader bufferedReader =
+                new BufferedReader(new FileReader("C:\\Users\\ADMIN\\Desktop\\LoanManagementSystem\\src\\main\\resources\\welcome.txt"))){
+            return  bufferedReader.lines().collect(Collectors.joining());
+        }catch (IOException exception){
+            exception.printStackTrace();
+        }
+        return null;
     }
 
     private Customer onBoardCustomer(RegisterUserRequest request) {
@@ -67,17 +99,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Response applyForLoan(UserLoanRequest request) {
-        log.info("GOT HERE SERVICE -> {}", request);
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
-        log.info("USER -> {}", user);
 
         if (user.isPresent()) {
-            log.info(" FIRST IF STATEMENT");
             Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
             if (loan.isPresent()) {
-                log.info(" SECOND IF STATEMENT");
                 if (loan.get().getBalance().intValue() > 0) {
-                    log.info(" THIRD IF STATEMENT");
                     throw new InvalidDetailException("Pay up your loan of " + loan.get().getBalance());
                 }
                 return getALoan(request, user);
