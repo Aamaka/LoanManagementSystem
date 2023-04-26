@@ -1,4 +1,5 @@
 package ezeirunne.chiamaka.loanmanagementsystem.services;
+import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.LoginUserRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.PaymentRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.RegisterUserRequest;
 import ezeirunne.chiamaka.loanmanagementsystem.dtos.requests.UserLoanRequest;
@@ -20,7 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceImplTest {
 
     @Autowired
-    private CustomerService userServices;
+    private CustomerService customerService;
+    @Autowired
+    private UserService userService;
 
     @Test
    public void register() {
@@ -32,23 +35,23 @@ class UserServiceImplTest {
         request.setAccountNumber("1626785910");
         request.setEmail("ada@gmail.com");
         request.setBankName("union");
-        request.setOccupation("Doctor");
         request.setDob("2005-06-09 00:00");
         request.setPassword("joy");
         request.setConfirmPassword("joy");
-        Response response = userServices.register(request);
+        Response response = customerService.register(request);
         assertNotNull(request);
         assertEquals("Your registration was successful, Welcome Ada", response.getMessage());
     }
 
-//    @Test
-//    public void login() {
-//        LoginUserRequest request = new LoginUserRequest();
-//        request.setEmail("ada@gmail.com");
-//        request.setPassword("joy");
-//        Response response = uServices.login(request);
-//        assertEquals("Welcome back Ada",response.getMessage());
-//    }
+    @Test
+    @DisplayName("test that a user can log in")
+    public void login() {
+        LoginUserRequest request = new LoginUserRequest();
+        request.setEmail("ada@gmail.com");
+        request.setPassword("joy");
+        Response response = userService.login(request);
+        assertEquals("Welcome back Ada",response.getMessage());
+    }
 
     @Test
     @DisplayName("test that a user can apply for a loan")
@@ -57,12 +60,12 @@ class UserServiceImplTest {
                 .amount(BigDecimal.valueOf(100000))
                 .loanPlan("1 year")
                 .loanPurpose("Marketing")
-                .guarantorName("Ade")
-                .guarantorPhoneNumber("6548979826")
+                .guardianName("Ade")
+                .guardianPhoneNumber("6548979826")
                 .email("ada@gmail.com")
                 .build();
         try{
-            Response response = userServices.applyForLoan(request);
+            Response response = customerService.applyForLoan(request);
             assertNotNull(response);
             assertEquals("Ada Your request has been received we will get back to you",response.getMessage());
         }catch (InvalidDetailException ex){
@@ -80,7 +83,7 @@ class UserServiceImplTest {
                 .paymentType(PaymentType.CARD)
                 .password("joy")
                 .build();
-        Response payment = userServices.makePayment(paymentRequest);
+        Response payment = customerService.makePayment(paymentRequest);
         assertThat("Your new balance is 50000").isEqualTo(payment.getMessage());
 
     }

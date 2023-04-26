@@ -25,5 +25,5 @@ public class Customer extends User {
     private String accountNumber;
 
     private String bankName;
-    private String occupation;
+
 }

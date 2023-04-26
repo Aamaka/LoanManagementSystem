@@ -5,7 +5,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 
 @AllArgsConstructor
@@ -23,6 +22,12 @@ public class Loan {
 
     private LocalDate dueDate;
     private String duration;
+    private String bvn;
+
+    private String schoolName;
+    private String schoolId;
+    private String department;
+    private String courseOfStudy;
 
     private BigDecimal balance ;
 
@@ -33,11 +38,11 @@ public class Loan {
 
     private String loanPlan;
 
-    private String guarantorName;
-    private String guarantorPhoneNumber;
+    private String guardianName;
+    private String guardianPhoneNumber;
 
     @JoinColumn
     @OneToOne
-    private Customer user;
+    private Customer customer;
 
 }

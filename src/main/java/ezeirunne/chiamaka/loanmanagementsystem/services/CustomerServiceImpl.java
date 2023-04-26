@@ -9,21 +9,16 @@ import ezeirunne.chiamaka.loanmanagementsystem.dtos.responses.Response;
 import ezeirunne.chiamaka.loanmanagementsystem.enums.Authority;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidDetailException;
 import ezeirunne.chiamaka.loanmanagementsystem.exceptions.InvalidSyntaxException;
-import ezeirunne.chiamaka.loanmanagementsystem.services.Notification.EmailNotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ezeirunne.chiamaka.loanmanagementsystem.validation.ValidateEmail.validateEmail;
 
@@ -39,7 +34,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
 
-    private final EmailNotificationService emailNotificationService;
+
     @Override
     public Response register(RegisterUserRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) throw new InvalidDetailException("User already exist");
@@ -55,36 +50,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Response response(RegisterUserRequest request, Customer customer) {
         User saveUser = userRepository.save(customer);
-        VerificationToken token = verificationTokenService.createToken(request.getEmail());
-        emailNotificationService.sendHtmlMail(buildEmailNotificationRequest(token, saveUser.getName()));
         Response response = new Response();
         response.setMessage("Your registration was successful, Welcome " + saveUser.getName());
         return response;
-    }
-
-    private EmailNotificationRequest buildEmailNotificationRequest(VerificationToken token, String name) {
-        String message = getMessageTemplate();
-        String mail = null;
-        if(message != null){
-            var verificationUrl="http://localhost:8080/api/loan/users/verify/" + token.getToken();
-            mail = String.format(message, name, verificationUrl);
-        }
-
-        return EmailNotificationRequest.builder()
-                .userEmail(token.getUserEmail())
-                .mailContent(mail)
-                .build();
-
-    }
-
-    private String getMessageTemplate() {
-        try(BufferedReader bufferedReader =
-                new BufferedReader(new FileReader("C:\\Users\\ADMIN\\Desktop\\LoanManagementSystem\\src\\main\\resources\\welcome.txt"))){
-            return  bufferedReader.lines().collect(Collectors.joining());
-        }catch (IOException exception){
-            exception.printStackTrace();
-        }
-        return null;
     }
 
     private Customer onBoardCustomer(RegisterUserRequest request) {
@@ -102,7 +70,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
 
         if (user.isPresent()) {
-            Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
+            Optional<Loan> loan = loanRepository.findByCustomerId(user.get().getId());
             if (loan.isPresent()) {
                 if (loan.get().getBalance().intValue() > 0) {
                     throw new InvalidDetailException("Pay up your loan of " + loan.get().getBalance());
@@ -116,23 +84,28 @@ public class CustomerServiceImpl implements CustomerService {
         throw new InvalidDetailException("User does not exist");
     }
 
-    private Response getALoan(UserLoanRequest request, Optional<Customer> user) {
+    private Response getALoan(UserLoanRequest request, Optional<Customer> customer) {
         Response response = new Response();
         if(request.getAmount().intValue() > 0){
             Loan loan = Loan.builder()
                     .amount(request.getAmount())
                     .loanPurpose(request.getLoanPurpose())
                     .loanPlan(request.getLoanPlan())
-                    .guarantorName(request.getGuarantorName())
+                    .guardianName(request.getGuardianName())
+                    .schoolName(request.getSchoolName())
+                    .schoolId(request.getSchoolId())
+                    .courseOfStudy(request.getCourseOfStudy())
+                    .department(request.getDepartment())
+                    .bvn(request.getBvn())
                     .loanDate(LocalDate.now())
-                    .guarantorPhoneNumber(request.getGuarantorPhoneNumber())
+                    .guardianPhoneNumber(request.getGuardianPhoneNumber())
                     .balance(request.getAmount())
-                    .user(user.get())
+                    .customer(customer.get())
                     .build();
 
             Loan saved = loanRepository.save(loan);
 
-            response.setMessage(saved.getUser().getName() + " Your request has been received we will get back to you");
+            response.setMessage(saved.getCustomer().getName() + " Your request has been received we will get back to you");
         }else {
             response.setMessage("amount must be greater than zero(0)");
         }
@@ -152,7 +125,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Loan findLoan(Request request) {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
         if (user.isPresent()) {
-            Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
+            Optional<Loan> loan = loanRepository.findByCustomerId(user.get().getId());
             if(loan.isPresent()){
                 if(loan.get().getBalance().intValue() > 0){
                     return loan.get();
@@ -169,7 +142,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> user = userRepository.findCustomerByEmail(request.getEmail());
         if(user.isPresent()){
             Response response = new Response();
-            Optional<Loan> loan = loanRepository.findByUserId(user.get().getId());
+            Optional<Loan> loan = loanRepository.findByCustomerId(user.get().getId());
             if(loan.isPresent()){
                 if(loan.get().getBalance().intValue() > 0){
                     if(request.getAmount().intValue() > 0){

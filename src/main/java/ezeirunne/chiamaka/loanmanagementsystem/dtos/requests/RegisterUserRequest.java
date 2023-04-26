@@ -37,7 +37,6 @@ public class RegisterUserRequest {
     @Column(unique = true)
     private String email;
 
-    private String occupation;
     private String password;
     private String confirmPassword;
 }

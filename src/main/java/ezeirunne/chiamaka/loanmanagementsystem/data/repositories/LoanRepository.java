@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
 
-    Optional<Loan> findByUserId(long id);
+    Optional<Loan> findByCustomerId(long id);
 
 }
