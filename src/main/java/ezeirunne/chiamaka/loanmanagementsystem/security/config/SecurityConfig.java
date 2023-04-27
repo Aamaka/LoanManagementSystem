@@ -29,7 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         UsernamePasswordAuthenticationFilter filter =
                 new LoanAuthenticationFilter(loanAuthenticationManager, jwtUtil);
-        filter.setFilterProcessesUrl("/api/loan/user/login/");
+        filter.setFilterProcessesUrl("/api/loan/users/login/");
         return http.cors().and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

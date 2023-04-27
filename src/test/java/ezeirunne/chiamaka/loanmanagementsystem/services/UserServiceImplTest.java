@@ -26,12 +26,14 @@ class UserServiceImplTest {
     private UserService userService;
 
     @Test
+    @DisplayName("test that a user can register")
    public void register() {
         RegisterUserRequest request = new RegisterUserRequest();
         request.setName("Ada");
         request.setAddress("Shomolah");
         request.setGender(Gender.FEMALE);
         request.setNin("3454848769P1796");
+        request.setPhoneNumber("095364675765");
         request.setAccountNumber("1626785910");
         request.setEmail("ada@gmail.com");
         request.setBankName("union");
@@ -59,19 +61,17 @@ class UserServiceImplTest {
         UserLoanRequest request = UserLoanRequest.builder()
                 .amount(BigDecimal.valueOf(100000))
                 .loanPlan("1 year")
-                .loanPurpose("Marketing")
+                .loanPurpose("school fees")
                 .guardianName("Ade")
                 .guardianPhoneNumber("6548979826")
                 .email("ada@gmail.com")
                 .build();
-        try{
+
             Response response = customerService.applyForLoan(request);
             assertNotNull(response);
             assertEquals("Ada Your request has been received we will get back to you",response.getMessage());
-        }catch (InvalidDetailException ex){
-            System.out.println(ex.getMessage());
-        }
-//        assertThrows(InvalidDetailException.class, ()-> userServices.loan(request));
+
+        assertThrows(InvalidDetailException.class, ()-> customerService.applyForLoan(request));
     }
 
     @Test
@@ -81,10 +81,9 @@ class UserServiceImplTest {
                 .amount(BigDecimal.valueOf(50000))
                 .email("ada@gmail.com")
                 .paymentType(PaymentType.CARD)
-                .password("joy")
                 .build();
         Response payment = customerService.makePayment(paymentRequest);
-        assertThat("Your new balance is 50000").isEqualTo(payment.getMessage());
+        assertThat("Your new balance is 0.00").isEqualTo(payment.getMessage());
 
     }
 }

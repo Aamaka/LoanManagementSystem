@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PaymentRequest {
     private String email;
-    private String password;
     private PaymentType paymentType;
     private BigDecimal amount;
 }

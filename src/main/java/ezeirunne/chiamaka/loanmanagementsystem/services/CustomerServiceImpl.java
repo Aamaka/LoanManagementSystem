@@ -32,7 +32,6 @@ public class CustomerServiceImpl implements CustomerService {
     private final PaymentRepository paymentRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationTokenService verificationTokenService;
 
 
     @Override
